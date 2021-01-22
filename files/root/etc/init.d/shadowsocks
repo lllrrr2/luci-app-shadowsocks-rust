@@ -1,7 +1,7 @@
 #!/bin/sh /etc/rc.common
 #
 # Copyright (C) 2014-2017 Jian Chang <aa65535@live.com>
-#                    2018 chenhw2 <https://github.com/chenhw2>
+#               2018-2021 honwen <https://github.com/honwen>
 #
 # This is free software, licensed under the GNU General Public License v3.
 # See /LICENSE for more information.
@@ -56,10 +56,6 @@ get_arg_out() {
 	esac
 }
 
-get_arg_tfo() {
-	uci_bool_by_name $1 fast_open && echo "--fast-open"
-}
-
 get_arg_tnd() {
 	uci_bool_by_name $1 no_delay && echo "--no-delay"
 }
@@ -105,9 +101,12 @@ gen_config_file() {
 		    "server_port": $(uci_get_by_name $1 server_port),
 		    $(get_crypto_config $1)
 		    "method": "$(uci_get_by_name $1 encrypt_method)",
+		    "local_port": 0,
 		    "local_address": "0.0.0.0",$(get_plugin_config $1)
 		    "timeout": $(uci_get_by_name $1 timeout 60),
-		    "reuse_port": true
+		    "udp_timeout": $(uci_get_by_name $1 timeout 60),
+		    "udp_max_associations": 1024,
+		    "nofile": 51200
 		}
 EOF
 	echo $config_file
@@ -159,47 +158,45 @@ start_rules() {
 }
 
 rules() {
-	pidof ss-redir >/dev/null || return 0
+	pidof sslocal >/dev/null || return 0
 	start_rules || /usr/bin/ss-rules -f
 }
 
 start_redir() {
 	validate_server $1 || return 0
-	ss-redir -c $(gen_config_file $1) $2 $(get_arg_tfo $1) $(get_arg_tnd $1) \
-		-l $(uci_get_by_type transparent_proxy local_port 1234) \
-		--mtu $(uci_get_by_type transparent_proxy mtu 1492) \
-		-f /var/run/ss-redir$3-$1.pid
+	sslocal -d --protocol=redir -c=$(gen_config_file $1) $2 $(get_arg_tnd $1) \
+		-b=0.0.0.0:$(uci_get_by_type transparent_proxy local_port 1234) \
+		--daemonize-pid=/var/run/ss-redir$3-$1.pid
 }
 
 ss_redir() {
-	command -v ss-redir >/dev/null 2>&1 || return 1
+	command -v sslocal >/dev/null 2>&1 || return 1
 	local main_server=$(uci_get_by_type transparent_proxy main_server)
 	has_valid_server $main_server || return 1
 	local udp_relay_server=$(uci_get_by_type transparent_proxy udp_relay_server)
 	if [ "$udp_relay_server" = "same" ]; then
 		for server in $main_server; do
-			start_redir $server -u
+			start_redir $server -U
 		done
 	else
 		for server in $main_server; do
 			start_redir $server
 		done
 		for server in $udp_relay_server; do
-			start_redir $server -U -udp
+			start_redir $server -u
 		done
 	fi
 }
 
 start_local() {
 	validate_server $1 || return 0
-	ss-local -c $(gen_config_file $1) -u $(get_arg_tfo $1) $(get_arg_tnd $1) \
-		-l $(uci_get_by_type socks5_proxy local_port 1080) \
-		--mtu $(uci_get_by_type socks5_proxy mtu 1492) \
-		-f /var/run/ss-local-$1.pid
+	sslocal -d --protocol=socks5 -c=$(gen_config_file $1) -U $(get_arg_tnd $1) \
+		-b=0.0.0.0:$(uci_get_by_type socks5_proxy local_port 1080) \
+		--daemonize-pid=/var/run/ss-local-$1.pid
 }
 
 ss_local() {
-	command -v ss-local >/dev/null 2>&1 || return 0
+	command -v sslocal >/dev/null 2>&1 || return 0
 	for server in $(uci_get_by_type socks5_proxy server); do
 		start_local $server
 	done
@@ -207,22 +204,21 @@ ss_local() {
 
 start_tunnel() {
 	validate_server $1 || return 0
-	ss-tunnel -c $(gen_config_file $1) -u $(get_arg_tfo $1) $(get_arg_tnd $1) \
-		-l $(uci_get_by_type port_forward local_port 5300) \
-		-L $(uci_get_by_type port_forward destination 8.8.4.4:53) \
-		--mtu $(uci_get_by_type port_forward mtu 1492) \
-		-f /var/run/ss-tunnel-$1.pid
+	sslocal -d --protocol=tunnel -c=$(gen_config_file $1) -U $(get_arg_tnd $1) \
+		-b=0.0.0.0:$(uci_get_by_type port_forward local_port 5300) \
+		-f=$(uci_get_by_type port_forward destination 8.8.4.4:53) \
+		--daemonize-pid=/var/run/ss-tunnel-$1.pid
 }
 
 ss_tunnel() {
-	command -v ss-tunnel >/dev/null 2>&1 || return 0
+	command -v sslocal >/dev/null 2>&1 || return 0
 	for server in $(uci_get_by_type port_forward server); do
 		start_tunnel $server
 	done
 }
 
 start() {
-	pidof ss-redir ss-local ss-tunnel >/dev/null && return 0
+	pidof sslocal >/dev/null && return 0
 	mkdir -p /var/run /var/etc $DNSMASQDIR
 	has_valid_server $(uci_get_by_type transparent_proxy main_server) && ss_pre
 	ss_redir && rules
@@ -244,7 +240,7 @@ kill_all() {
 
 stop() {
 	/usr/bin/ss-rules -f
-	kill_all ss-redir ss-local ss-tunnel
+	kill_all sslocal
 	if [ -f /var/run/ss-plugin ]; then
 		kill_all $(sort -u /var/run/ss-plugin)
 		rm -f /var/run/ss-plugin
@@ -266,7 +262,7 @@ del_cron() {
 }
 
 watchdog(){
-	command -v ss-redir >/dev/null 2>&1 || return 1
+	command -v sslocal >/dev/null 2>&1 || return 1
 	local main_server=$(uci_get_by_type transparent_proxy main_server)
 	has_valid_server $main_server || return 1
 

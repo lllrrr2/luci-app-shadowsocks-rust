@@ -1,4 +1,4 @@
-OpenWrt LuCI for Shadowsocks-libev
+OpenWrt LuCI for Shadowsocks-Rust
 ===
 
 [![Latest release][release_badge]][release_url]
@@ -6,7 +6,7 @@ OpenWrt LuCI for Shadowsocks-libev
 简介
 ---
 
-本软件包是 [shadowsocks-libev][openwrt-shadowsocks] 的 LuCI 控制界面,
+本软件包是 [shadowsocks-rust][openwrt-shadowsocks] 的 LuCI 控制界面,
 方便用户控制和使用「透明代理」「SOCKS5 代理」「端口转发」功能.  
 
 软件包文件结构:
@@ -42,16 +42,14 @@ OpenWrt LuCI for Shadowsocks-libev
 ---
 
 软件包的正常使用需要依赖 `iptables` 和 `ipset`.  
-软件包不显式依赖 `shadowsocks-libev`, 会根据用户添加的可执行文件启用相应的功能.  
+软件包不显式依赖 `shadowsocks-rust`, 会根据用户添加的可执行文件启用相应的功能.  
 **GFW-List模式 正常使用需要依赖 [dnsmasq-extra][openwrt-dnsmasq-extra], 其中包括`DNS防污染`和`GFW-List`**  
-可执行文件可通过安装 [openwrt-shadowsocks][openwrt-shadowsocks] 中提供的 `shadowsocks-libev` 获得.  
+可执行文件可通过安装 [openwrt-shadowsocks][openwrt-shadowsocks] 中提供的 `shadowsocks-rust` 获得.  
 只有当文件存在时, 相应的功能才可被使用, 并显示相应的 LuCI 设置界面.  
 
  可执行文件  | 可选 | 功能        | TCP协议 | UDP协议 
  ------------|------|-------------|---------|-----------------------------------
- `ss-redir`  | 是   | 透明代理    | 支持    | 需安装 `iptables-mod-tproxy`, `ip`
- `ss-local`  | 是   | SOCKS5 代理 | 支持    | 支持
- `ss-tunnel` | 是   | 端口转发    | 支持    | 支持
+ `sslocal`  | 是   | 透明代理    | 支持    | 需安装 `iptables-mod-tproxy`, `ip`
 
 注: 可执行文件在 `$PATH` 环境变量所表示的搜索路径中, 都可被正确调用.
 
@@ -84,7 +82,7 @@ make package/luci-app-shadowsocks/compile V=99
 
  [release_badge]: https://img.shields.io/github/release/shadowsocks/luci-app-shadowsocks.svg
  [release_url]: https://github.com/shadowsocks/luci-app-shadowsocks/releases/latest
- [openwrt-shadowsocks]: https://github.com/shadowsocks/openwrt-shadowsocks
+ [openwrt-shadowsocks]: https://github.com/honwen/openwrt-shadowsocks
  [openwrt-sdk]: https://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
  [ss-rules]: https://github.com/shadowsocks/luci-app-shadowsocks/wiki/Instruction-of-ss-rules
  [Use-UCI-system]: https://github.com/shadowsocks/luci-app-shadowsocks/wiki/Use-UCI-system

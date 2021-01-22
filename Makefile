@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2016-2018 Jian Chang <aa65535@live.com>
-#               2017-2020 honwen https://github.com/honwen
+#               2017-2021 honwen https://github.com/honwen
 #
 # This is free software, licensed under the GNU General Public License v3.
 # See /LICENSE for more information.
@@ -9,8 +9,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-shadowsocks
-PKG_VERSION:=1.9.0
-PKG_RELEASE:=10
+PKG_VERSION:=2.0.0
+PKG_RELEASE:=1
 
 PKG_LICENSE:=GPLv3
 PKG_LICENSE_FILES:=LICENSE
@@ -24,7 +24,7 @@ define Package/luci-app-shadowsocks/Default
 	SECTION:=luci
 	CATEGORY:=LuCI
 	SUBMENU:=3. Applications
-	TITLE:=LuCI Support for shadowsocks-libev
+	TITLE:=LuCI Support for shadowsocks-rust
 	PKGARCH:=all
 	DEPENDS:=+iptables +ipset +curl +ip +iptables-mod-tproxy $(1)
 endef
@@ -32,7 +32,7 @@ endef
 Package/luci-app-shadowsocks = $(call Package/luci-app-shadowsocks/Default,+ipset)
 
 define Package/luci-app-shadowsocks/description
-	LuCI Support for shadowsocks-libev.
+	LuCI Support for shadowsocks-rust.
 endef
 
 define Build/Prepare

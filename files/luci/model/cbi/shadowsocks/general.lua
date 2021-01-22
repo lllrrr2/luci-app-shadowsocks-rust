@@ -1,4 +1,5 @@
 -- Copyright (C) 2014-2018 Jian Chang <aa65535@live.com>
+-- Copyright (C) 2020-2021 honwen <https://github.com/honwen>
 -- Licensed to the public under the GNU General Public License v3.
 
 local m, s, o
@@ -10,23 +11,19 @@ local function has_bin(name)
 	return luci.sys.call("command -v %s >/dev/null" %{name}) == 0
 end
 
-local function has_ss_bin()
-	return has_bin("ss-redir"), has_bin("ss-local"), has_bin("ss-tunnel")
-end
-
 local function has_udp_relay()
 	return luci.sys.call("lsmod | grep -q TPROXY && command -v ip >/dev/null") == 0
 end
 
-local has_redir, has_local, has_tunnel = has_ss_bin()
+local has_ss = has_bin("sslocal")
 
-if not has_redir and not has_local and not has_tunnel then
+if not has_ss then
 	return Map(shadowsocks, "%s - %s" %{translate("ShadowSocks"),
-		translate("General Settings")}, '<b style="color:red">shadowsocks-libev binary file not found.</b>')
+		translate("General Settings")}, '<b style="color:red">shadowsocks-rust binary file not found.</b>')
 end
 
 local function is_running(name)
-	return luci.sys.call("pidof %s >/dev/null" %{name}) == 0
+	return luci.sys.call("pgrep -f '%s' >/dev/null" %{name}) == 0
 end
 
 local function get_status(name)
@@ -46,23 +43,17 @@ m.template = "shadowsocks/general"
 s = m:section(TypedSection, "general", translate("Running Status"))
 s.anonymous = true
 
-if has_redir then
-	o = s:option(DummyValue, "_redir_status", translate("Transparent Proxy"))
-	o.value = "<span id=\"_redir_status\">%s</span>" %{get_status("ss-redir")}
-	o.rawhtml = true
-end
+o = s:option(DummyValue, "_redir_status", translate("Transparent Proxy"))
+o.value = "<span id=\"_redir_status\">%s</span>" %{get_status("protocol=redir")}
+o.rawhtml = true
 
-if has_local then
-	o = s:option(DummyValue, "_local_status", translate("SOCKS5 Proxy"))
-	o.value = "<span id=\"_local_status\">%s</span>" %{get_status("ss-local")}
-	o.rawhtml = true
-end
+o = s:option(DummyValue, "_local_status", translate("SOCKS5 Proxy"))
+o.value = "<span id=\"_local_status\">%s</span>" %{get_status("protocol=socks")}
+o.rawhtml = true
 
-if has_tunnel then
-	o = s:option(DummyValue, "_tunnel_status", translate("Port Forward"))
-	o.value = "<span id=\"_tunnel_status\">%s</span>" %{get_status("ss-tunnel")}
-	o.rawhtml = true
-end
+o = s:option(DummyValue, "_tunnel_status", translate("Port Forward"))
+o.value = "<span id=\"_tunnel_status\">%s</span>" %{get_status("protocol=tunnel")}
+o.rawhtml = true
 
 s = m:section(TypedSection, "general", translate("Global Settings"))
 s.anonymous = true
@@ -77,84 +68,63 @@ o.default = 0
 o.rmempty = false
 
 -- [[ Transparent Proxy ]]--
-if has_redir then
-	s = m:section(TypedSection, "transparent_proxy", translate("Transparent Proxy"))
-	s.anonymous = true
+s = m:section(TypedSection, "transparent_proxy", translate("Transparent Proxy"))
+s.anonymous = true
 
-	o = s:option(DynamicList, "main_server", translate("Main Server"))
+o = s:option(DynamicList, "main_server", translate("Main Server"))
+o:value("nil", translate("Disable"))
+for _, s in ipairs(servers) do o:value(s.name, s.alias) end
+o.default = "nil"
+o.rmempty = false
+
+o = s:option(ListValue, "udp_relay_server", translate("UDP-Relay Server"))
+if has_udp_relay() then
 	o:value("nil", translate("Disable"))
+	o:value("same", translate("Same as Main Server"))
 	for _, s in ipairs(servers) do o:value(s.name, s.alias) end
-	o.default = "nil"
-	o.rmempty = false
-
-	o = s:option(ListValue, "udp_relay_server", translate("UDP-Relay Server"))
-	if has_udp_relay() then
-		o:value("nil", translate("Disable"))
-		o:value("same", translate("Same as Main Server"))
-		for _, s in ipairs(servers) do o:value(s.name, s.alias) end
-	else
-		o:value("nil", translate("Unusable - Missing iptables-mod-tproxy or ip"))
-	end
-	o.default = "nil"
-	o.rmempty = false
-
-	o = s:option(Value, "local_port", translate("Local Port"))
-	o.datatype = "port"
-	o.default = 1234
-	o.rmempty = false
-
-	o = s:option(Value, "mtu", translate("Override MTU"))
-	o.datatype = "range(296,9200)"
-	o.default = 1492
-	o.rmempty = false
+else
+	o:value("nil", translate("Unusable - Missing iptables-mod-tproxy or ip"))
 end
+o.default = "nil"
+o.rmempty = false
+
+o = s:option(Value, "local_port", translate("Local Port"))
+o.datatype = "port"
+o.default = 1234
+o.rmempty = false
 
 -- [[ SOCKS5 Proxy ]]--
-if has_local then
-	s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
-	s.anonymous = true
+s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
+s.anonymous = true
 
-	o = s:option(DynamicList, "server", translate("Server"))
-	o:value("nil", translate("Disable"))
-	for _, s in ipairs(servers) do o:value(s.name, s.alias) end
-	o.default = "nil"
-	o.rmempty = false
+o = s:option(DynamicList, "server", translate("Server"))
+o:value("nil", translate("Disable"))
+for _, s in ipairs(servers) do o:value(s.name, s.alias) end
+o.default = "nil"
+o.rmempty = false
 
-	o = s:option(Value, "local_port", translate("Local Port"))
-	o.datatype = "port"
-	o.default = 1080
-	o.rmempty = false
-
-	o = s:option(Value, "mtu", translate("Override MTU"))
-	o.datatype = "range(296,9200)"
-	o.default = 1492
-	o.rmempty = false
-end
+o = s:option(Value, "local_port", translate("Local Port"))
+o.datatype = "port"
+o.default = 1080
+o.rmempty = false
 
 -- [[ Port Forward ]]--
-if has_tunnel then
-	s = m:section(TypedSection, "port_forward", translate("Port Forward"))
-	s.anonymous = true
+s = m:section(TypedSection, "port_forward", translate("Port Forward"))
+s.anonymous = true
 
-	o = s:option(DynamicList, "server", translate("Server"))
-	o:value("nil", translate("Disable"))
-	for _, s in ipairs(servers) do o:value(s.name, s.alias) end
-	o.default = "nil"
-	o.rmempty = false
+o = s:option(DynamicList, "server", translate("Server"))
+o:value("nil", translate("Disable"))
+for _, s in ipairs(servers) do o:value(s.name, s.alias) end
+o.default = "nil"
+o.rmempty = false
 
-	o = s:option(Value, "local_port", translate("Local Port"))
-	o.datatype = "port"
-	o.default = 5300
-	o.rmempty = false
+o = s:option(Value, "local_port", translate("Local Port"))
+o.datatype = "port"
+o.default = 5300
+o.rmempty = false
 
-	o = s:option(Value, "destination", translate("Destination"))
-	o.default = "8.8.4.4:53"
-	o.rmempty = false
-
-	o = s:option(Value, "mtu", translate("Override MTU"))
-	o.datatype = "range(296,9200)"
-	o.default = 1492
-	o.rmempty = false
-end
+o = s:option(Value, "destination", translate("Destination"))
+o.default = "8.8.4.4:53"
+o.rmempty = false
 
 return m

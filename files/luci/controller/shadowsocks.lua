@@ -1,4 +1,5 @@
 -- Copyright (C) 2014-2017 Jian Chang <aa65535@live.com>
+-- Copyright (C) 2020-2021 honwen <https://github.com/honwen>
 -- Licensed to the public under the GNU General Public License v3.
 
 module("luci.controller.shadowsocks", package.seeall)
@@ -50,15 +51,15 @@ function index()
 end
 
 local function is_running(name)
-	return luci.sys.call("pidof %s >/dev/null" %{name}) == 0
+	return luci.sys.call("pgrep -f '%s' >/dev/null" %{name}) == 0
 end
 
 function action_status()
 	luci.http.prepare_content("application/json")
 	luci.http.write_json({
-		ss_redir = is_running("ss-redir"),
-		ss_local = is_running("ss-local"),
-		ss_tunnel = is_running("ss-tunnel")
+		ss_redir = is_running("protocol=redir"),
+		ss_local = is_running("protocol=socks"),
+		ss_tunnel = is_running("protocol=tunnel")
 	})
 end
 
