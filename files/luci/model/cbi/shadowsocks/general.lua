@@ -67,9 +67,22 @@ o.datatype = "uinteger"
 o.default = 0
 o.rmempty = false
 
+o = s:option(Value, "udp_timeout", translate("Timeout for UDP Associations"))
+o.datatype = "range(10,1800)"
+o.default = 300
+o.rmempty = false
+
+o = s:option(Value, "udp_max_associations", translate("Maximum UDP Associations"))
+o.datatype = "range(64,4096)"
+o.default = 512
+o.rmempty = false
+
 -- [[ Transparent Proxy ]]--
 s = m:section(TypedSection, "transparent_proxy", translate("Transparent Proxy"))
 s.anonymous = true
+
+o = s:option(Flag, "no_delay", translate("TCP no-delay"))
+o.rmempty = false
 
 o = s:option(DynamicList, "main_server", translate("Main Server"))
 o:value("nil", translate("Disable"))
@@ -97,6 +110,9 @@ o.rmempty = false
 s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
 s.anonymous = true
 
+o = s:option(Flag, "no_delay", translate("TCP no-delay"))
+o.rmempty = false
+
 o = s:option(DynamicList, "server", translate("Server"))
 o:value("nil", translate("Disable"))
 for _, s in ipairs(servers) do o:value(s.name, s.alias) end
@@ -111,6 +127,9 @@ o.rmempty = false
 -- [[ Port Forward ]]--
 s = m:section(TypedSection, "port_forward", translate("Port Forward"))
 s.anonymous = true
+
+o = s:option(Flag, "no_delay", translate("TCP no-delay"))
+o.rmempty = false
 
 o = s:option(DynamicList, "server", translate("Server"))
 o:value("nil", translate("Disable"))

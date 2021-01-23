@@ -1,4 +1,5 @@
 -- Copyright (C) 2016-2017 Jian Chang <aa65535@live.com>
+-- Copyright (C) 2020-2021 honwen <https://github.com/honwen>
 -- Licensed to the public under the GNU General Public License v3.
 
 local m, s, o
@@ -44,12 +45,6 @@ s.addremove = false
 o = s:option(Value, "alias", translate("Alias(optional)"))
 o.rmempty = true
 
-o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
-o.rmempty = false
-
-o = s:option(Flag, "no_delay", translate("TCP no-delay"))
-o.rmempty = false
-
 o = s:option(Value, "server", translate("Server Address"))
 o.datatype = "host"
 o.rmempty = false
@@ -58,15 +53,13 @@ o = s:option(Value, "server_port", translate("Server Port"))
 o.datatype = "port"
 o.rmempty = false
 
-o = s:option(Value, "timeout", translate("Connection Timeout"))
+o = s:option(Value, "timeout", translate("TCP Connection Timeout"))
 o.datatype = "uinteger"
 o.default = 60
 o.rmempty = false
 
 o = s:option(Value, "password", translate("Password"))
 o.password = true
-
-o = s:option(Value, "key", translate("Directly Key"))
 
 o = s:option(ListValue, "encrypt_method", translate("Encrypt Method"))
 for _, v in ipairs(encrypt_methods) do o:value(v, v:upper()) end

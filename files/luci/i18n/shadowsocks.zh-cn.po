@@ -73,6 +73,9 @@ msgstr "本地端口"
 msgid "Main Server"
 msgstr "主服务器"
 
+msgid "Maximum UDP Associations"
+msgstr "UDP协商数上限"
+
 msgid "None"
 msgstr "无"
 
@@ -142,6 +145,9 @@ msgstr "SOCKS5代理"
 msgid "Startup Delay"
 msgstr "自启动延时"
 
+msgid "TCP Connection Timeout"
+msgstr "TCP 连接超时"
+
 msgid "TCP Fast Open"
 msgstr "TCP快速打开"
 
@@ -150,6 +156,9 @@ msgstr "TCP无延时"
 
 msgid "Transparent Proxy"
 msgstr "透明代理"
+
+msgid "Timeout for UDP Associations"
+msgstr "UDP协商超时"
 
 msgid "Proxy Type"
 msgstr "代理类型"

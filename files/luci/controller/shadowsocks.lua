@@ -24,7 +24,7 @@ function index()
 		arcombine(cbi("shadowsocks/servers"), cbi("shadowsocks/servers-details")),
 		_("Servers Manage"), 20).leaf = true
 
-	if luci.sys.call("command -v ss-redir >/dev/null") ~= 0 then
+	if luci.sys.call("command -v sslocal >/dev/null") ~= 0 then
 		return
 	end
 
