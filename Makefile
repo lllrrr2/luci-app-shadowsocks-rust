@@ -10,11 +10,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-shadowsocks
 PKG_VERSION:=2.0.1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_LICENSE:=GPLv3
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=chenhw2 <https://github.com/chenhw2>
+PKG_MAINTAINER:=honwen <https://github.com/honwen>
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 

@@ -100,6 +100,12 @@ get_crypto_config() {
 	fi
 }
 
+get_udp_config() {
+	udp_max_associations=$(uci_get_by_type general udp_max_associations 512)
+	echo -e "\n    \"udp_timeout\": $(uci_get_by_type general udp_timeout 300),"
+	[ $udp_max_associations -gt 0 ] && echo "    \"udp_max_associations\": ${udp_max_associations},"
+}
+
 gen_server_config() {
 	validate_server $1 && cat <<-EOF
 		      {
@@ -114,15 +120,13 @@ EOF
 
 gen_config_file() {
 	local config_file=/var/etc/$NAME.$2.json
-	cat <<-EOF | sed 's+,!$++g' >$config_file
+	cat <<-EOF | sed 's+},__$+}+g' >$config_file
 		{
 		    "servers": [
-					$(for server in $1; do gen_server_config $server; done)!
+					$(for server in $1; do gen_server_config $server; done)__
 		    ],
-		    "local_port": 0,
 		    "local_address": "0.0.0.0",
-		    "udp_timeout": $(uci_get_by_type general udp_timeout 300),
-		    "udp_max_associations": $(uci_get_by_type general udp_max_associations 512),
+		    "local_port": 0,$(get_udp_config)
 		    "nofile": 51200
 		}
 EOF

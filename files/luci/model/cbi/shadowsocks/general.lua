@@ -73,7 +73,7 @@ o.default = 300
 o.rmempty = false
 
 o = s:option(Value, "udp_max_associations", translate("Maximum UDP Associations"))
-o.datatype = "range(64,4096)"
+o.datatype = "range(0,4096)"
 o.default = 512
 o.rmempty = false
 

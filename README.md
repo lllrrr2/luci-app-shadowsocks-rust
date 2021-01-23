@@ -69,7 +69,7 @@ OpenWrt LuCI for Shadowsocks-Rust
 tar xjf OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
 cd OpenWrt-SDK-ar71xx-*
 # Clone 项目
-git clone https://github.com/chenhw2/luci-app-shadowsocks-rust.git package/luci-app-shadowsocks-rust
+git clone https://github.com/honwen/luci-app-shadowsocks-rust.git package/luci-app-shadowsocks-rust
 # 编译 po2lmo (如果有po2lmo可跳过)
 pushd package/luci-app-shadowsocks-rust/tools/po2lmo
 make && sudo make install
@@ -88,4 +88,4 @@ make package/luci-app-shadowsocks/compile V=99
  [Use-UCI-system]: https://github.com/shadowsocks/luci-app-shadowsocks/wiki/Use-UCI-system
  [uci]: https://wiki.openwrt.org/doc/uci
  [LuCI-Access-Control]: https://github.com/shadowsocks/luci-app-shadowsocks/wiki/LuCI-Access-Control
- [openwrt-dnsmasq-extra]: https://github.com/chenhw2/openwrt-dnsmasq-extra
+ [openwrt-dnsmasq-extra]: https://github.com/honwen/openwrt-dnsmasq-extra
