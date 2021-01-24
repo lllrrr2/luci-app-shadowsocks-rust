@@ -103,7 +103,9 @@ get_crypto_config() {
 get_udp_config() {
 	udp_max_associations=$(uci_get_by_type general udp_max_associations 512)
 	echo -e "\n    \"udp_timeout\": $(uci_get_by_type general udp_timeout 300),"
-	[ $udp_max_associations -gt 0 ] && echo "    \"udp_max_associations\": ${udp_max_associations},"
+	if [ $udp_max_associations -gt 0 ]; then
+		echo "    \"udp_max_associations\": ${udp_max_associations},"
+	fi
 }
 
 gen_server_config() {
@@ -206,21 +208,22 @@ ss_redir() {
 
 start_local() {
 	has_valid_server $1 || return 0
-	sslocal -d --protocol=socks5 -U $(get_arg_tnd socks5_proxy) \
-		-c=$(gen_config_file "$1" "local$2") \
-		-b=0.0.0.0:$(uci_get_by_type socks5_proxy local_port 1080) \
-		--daemonize-pid=/var/run/ss-local.pid
+	sslocal -d --protocol=$2 -U $(get_arg_tnd ${2}_proxy) \
+		-c=$(gen_config_file "$1" "local") \
+		-b=0.0.0.0:$(uci_get_by_type ${2}_proxy local_port 1080) \
+		--daemonize-pid=/var/run/ss-local-$2.pid
 }
 
 ss_local() {
 	command -v sslocal >/dev/null 2>&1 || return 0
-	start_local "$(uci_get_by_type socks5_proxy server)"
+	start_local "$(uci_get_by_type http_proxy server)" "http"
+	start_local "$(uci_get_by_type socks5_proxy server)" "socks5"
 }
 
 start_tunnel() {
 	has_valid_server $1 || return 0
 	sslocal -d --protocol=tunnel -U $(get_arg_tnd port_forward) \
-		-c=$(gen_config_file "$1" "tunnel$2") \
+		-c=$(gen_config_file "$1" "tunnel") \
 		-b=0.0.0.0:$(uci_get_by_type port_forward local_port 5300) \
 		-f=$(uci_get_by_type port_forward destination 8.8.4.4:53) \
 		--daemonize-pid=/var/run/ss-tunnel.pid

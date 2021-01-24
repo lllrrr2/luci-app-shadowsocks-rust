@@ -106,6 +106,24 @@ o.datatype = "port"
 o.default = 1234
 o.rmempty = false
 
+-- [[ HTTP Proxy ]]--
+s = m:section(TypedSection, "http_proxy", translate("HTTP Proxy"))
+s.anonymous = true
+
+o = s:option(Flag, "no_delay", translate("TCP no-delay"))
+o.rmempty = false
+
+o = s:option(DynamicList, "server", translate("Server"))
+o:value("nil", translate("Disable"))
+for _, s in ipairs(servers) do o:value(s.name, s.alias) end
+o.default = "nil"
+o.rmempty = false
+
+o = s:option(Value, "local_port", translate("Local Port"))
+o.datatype = "port"
+o.default = 1080
+o.rmempty = false
+
 -- [[ SOCKS5 Proxy ]]--
 s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
 s.anonymous = true

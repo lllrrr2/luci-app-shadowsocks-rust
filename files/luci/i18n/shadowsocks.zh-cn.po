@@ -64,6 +64,9 @@ msgstr "全局设置"
 msgid "Host"
 msgstr "主机"
 
+msgid "HTTP Proxy"
+msgstr "HTTP代理"
+
 msgid "LAN Hosts"
 msgstr "内网主机"
 

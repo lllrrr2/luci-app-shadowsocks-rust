@@ -3,6 +3,8 @@ uci get shadowsocks.@general[-1] >/dev/null 2>&1 || \
 	uci add shadowsocks general >/dev/null 2>&1
 uci get shadowsocks.@transparent_proxy[-1] >/dev/null 2>&1 || \
 	uci add shadowsocks transparent_proxy >/dev/null 2>&1
+uci get shadowsocks.@http_proxy[-1] >/dev/null 2>&1 || \
+	uci add shadowsocks http_proxy >/dev/null 2>&1
 uci get shadowsocks.@socks5_proxy[-1] >/dev/null 2>&1 || \
 	uci add shadowsocks socks5_proxy >/dev/null 2>&1
 uci get shadowsocks.@port_forward[-1] >/dev/null 2>&1 || \

@@ -7,6 +7,10 @@ config transparent_proxy
 	option udp_relay_server 'nil'
 	option local_port '1234'
 
+config http_proxy
+	list server 'nil'
+	option local_port '8080'
+
 config socks5_proxy
 	list server 'nil'
 	option local_port '1080'
@@ -18,13 +22,11 @@ config port_forward
 
 config servers
 	option alias 'sample'
-	option fast_open '0'
-	option no_delay '0'
 	option server '127.0.0.1'
 	option server_port '8388'
 	option timeout '60'
 	option password 'barfoo!'
-	option encrypt_method 'rc4-md5'
+	option encrypt_method 'aes-256-gcm'
 
 config access_control
 	option self_proxy '1'
