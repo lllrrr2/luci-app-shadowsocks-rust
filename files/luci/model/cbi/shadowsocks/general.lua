@@ -47,8 +47,12 @@ o = s:option(DummyValue, "_redir_status", translate("Transparent Proxy"))
 o.value = "<span id=\"_redir_status\">%s</span>" %{get_status("protocol=redir")}
 o.rawhtml = true
 
-o = s:option(DummyValue, "_local_status", translate("SOCKS5 Proxy"))
-o.value = "<span id=\"_local_status\">%s</span>" %{get_status("protocol=socks")}
+o = s:option(DummyValue, "http_status", translate("HTTP Proxy"))
+o.value = "<span id=\"_http_status\">%s</span>" %{get_status("protocol=http")}
+o.rawhtml = true
+
+o = s:option(DummyValue, "socks_status", translate("SOCKS5 Proxy"))
+o.value = "<span id=\"_socks_status\">%s</span>" %{get_status("protocol=socks")}
 o.rawhtml = true
 
 o = s:option(DummyValue, "_tunnel_status", translate("Port Forward"))
@@ -60,7 +64,7 @@ s.anonymous = true
 
 o = s:option(Value, "startup_delay", translate("Startup Delay"))
 o:value(0, translate("Not enabled"))
-for _, v in ipairs({5, 10, 15, 25, 40}) do
+for _, v in ipairs({3, 5, 10, 15, 25, 40}) do
 	o:value(v, translatef("%u seconds", v))
 end
 o.datatype = "uinteger"
@@ -68,12 +72,17 @@ o.default = 0
 o.rmempty = false
 
 o = s:option(Value, "udp_timeout", translate("Timeout for UDP Associations"))
-o.datatype = "range(10,1800)"
+for _, v in ipairs({10, 30, 60, 120, 180, 300, 600, 1800}) do
+	o:value(v, translatef("%u seconds", v))
+end
 o.default = 300
 o.rmempty = false
 
 o = s:option(Value, "udp_max_associations", translate("Maximum UDP Associations"))
-o.datatype = "range(0,4096)"
+o:value(0, translate("Unlimited"))
+for _, v in ipairs({64, 256, 1024, 5120, 8192, 32768}) do
+	o:value(v)
+end
 o.default = 512
 o.rmempty = false
 

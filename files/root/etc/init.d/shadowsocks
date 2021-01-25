@@ -209,7 +209,7 @@ ss_redir() {
 start_local() {
 	has_valid_server $1 || return 0
 	sslocal -d --protocol=$2 -U $(get_arg_tnd ${2}_proxy) \
-		-c=$(gen_config_file "$1" "local") \
+		-c=$(gen_config_file "$1" "$2") \
 		-b=0.0.0.0:$(uci_get_by_type ${2}_proxy local_port 1080) \
 		--daemonize-pid=/var/run/ss-local-$2.pid
 }

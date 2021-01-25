@@ -58,7 +58,8 @@ function action_status()
 	luci.http.prepare_content("application/json")
 	luci.http.write_json({
 		ss_redir = is_running("protocol=redir"),
-		ss_local = is_running("protocol=socks"),
+		ss_http = is_running("protocol=http"),
+		ss_socks = is_running("protocol=socks"),
 		ss_tunnel = is_running("protocol=tunnel")
 	})
 end

@@ -1,6 +1,7 @@
 <%#
  Copyright (C) 2017-2018 Jian Chang <aa65535@live.com>
- Licensed to the public under the GNU General Public License v3.
+ Copyright (C) 2020-2021 honwen <https://github.com/honwen>
+Licensed to the public under the GNU General Public License v3.
 -%>
 
 <% include("cbi/map") %>
@@ -74,7 +75,8 @@
 
 		var elements = {
 			ss_redir: document.getElementById("_redir_status"),
-			ss_local: document.getElementById("_local_status"),
+			ss_http: document.getElementById("_http_status"),
+			ss_socks: document.getElementById("_socks_status"),
 			ss_tunnel: document.getElementById("_tunnel_status"),
 		};
 		XHR.poll(5, "<%=luci.dispatcher.build_url("admin", "services", "shadowsocks", "status")%>", null, function(xhr, status) {
