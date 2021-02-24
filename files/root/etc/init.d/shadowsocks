@@ -128,7 +128,7 @@ gen_config_file() {
 					$(for server in $1; do gen_server_config $server; done)__
 		    ],
 		    "local_address": "0.0.0.0",
-		    "local_port": 0,$(get_udp_config)
+		    "local_port": 65535,$(get_udp_config)
 		    "nofile": 51200
 		}
 EOF

@@ -65,15 +65,13 @@ function action_status()
 end
 
 function action_log()
-	local fs = require "nixio.fs"
 	local conffile = "/var/log/shadowsocks_watchdog.log"
-	local watchdog = fs.readfile(conffile) or ""
+	local watchdog = nixio.fs.readfile(conffile) or ""
 	luci.template.render("shadowsocks/plain", {content=watchdog})
 end
 
 function action_gfw()
-	local fs = require "nixio.fs"
 	local conffile = "/etc/dnsmasq-extra.d/gfwlist"
-	local gfwlist = fs.readfile(conffile) or ""
+	local gfwlist = nixio.fs.readfile(conffile) or luci.sys.exec("cat %s.gz | gunzip -c" %{conffile}) or ""
 	luci.template.render("shadowsocks/plain", {content=gfwlist})
 end
