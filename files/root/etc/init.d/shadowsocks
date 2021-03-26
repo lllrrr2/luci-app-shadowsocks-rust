@@ -225,7 +225,7 @@ start_local() {
 ss_local() {
 	command -v sslocal >/dev/null 2>&1 || return 0
 	start_local "$(uci_get_by_type http_proxy server)" "http"
-	start_local "$(uci_get_by_type socks5_proxy server)" "socks5"
+	start_local "$(uci_get_by_type socks5_proxy server)" "socks"
 }
 
 start_tunnel() {
