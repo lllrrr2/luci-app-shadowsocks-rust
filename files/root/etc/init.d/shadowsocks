@@ -143,6 +143,7 @@ ss_pre() {
 	for server in $(config_foreach get_server_ips servers); do
 		cat <<-EOF >> $tmpDNSconf
 		ipset=/${server}/ss_spec_dst_sp
+		server=/${server}/#
 		server=/${server}/162.14.21.56
 		server=/${server}/162.14.21.178
 		server=/${server}/114.114.114.114
@@ -152,6 +153,8 @@ ss_pre() {
 EOF
 	done
 
+	( grep -q 'no-resolv' /etc/dnsmasq.conf /var/etc/dnsmasq.conf.* 2>/dev/null) && sed "/\/#$/d" -i $tmpDNSconf
+	( grep -q 'no-resolv' /etc/dnsmasq.d/* /var/dnsmasq.d/* 2>/dev/null) && sed "/\/#$/d" -i $tmpDNSconf
 	( sort -u $tmpDNSconf | sed '/\/\//d; /\/127.0.0.1\//d' > $DNSconf ) && rm -f $tmpDNSconf
 
 	echo "server=/${WATCHDOG_ENDPOINT}/127.0.0.1#$(uci_get_by_type port_forward local_port 5300)" >> $DNSconf
