@@ -24,4 +24,5 @@ uci -q batch <<-EOF >/dev/null
 	set firewall.shadowsocks.reload=1
 	commit firewall
 EOF
+sysctl -w net.ipv4.tcp_fastopen=3
 exit 0

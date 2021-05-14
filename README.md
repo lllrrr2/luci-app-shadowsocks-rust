@@ -43,7 +43,9 @@ OpenWrt LuCI for Shadowsocks-Rust
 
 软件包的正常使用需要依赖 `iptables` 和 `ipset`.  
 软件包不显式依赖 `shadowsocks-rust`, 会根据用户添加的可执行文件启用相应的功能.  
-**GFW-List模式 正常使用需要依赖 [dnsmasq-extra][openwrt-dnsmasq-extra], 其中包括`DNS防污染`和`GFW-List`**  
+-  `TCP Fast-Open` 依赖版本 v1.11.0 或更高
+-  GFW-List模式 正常使用需要依赖 [dnsmasq-extra][openwrt-dnsmasq-extra], 其中包括`DNS防污染`和`GFW-List`
+
 可执行文件可通过安装 [openwrt-shadowsocks][openwrt-shadowsocks] 中提供的 `shadowsocks-rust` 获得.  
 只有当文件存在时, 相应的功能才可被使用, 并显示相应的 LuCI 设置界面.  
 

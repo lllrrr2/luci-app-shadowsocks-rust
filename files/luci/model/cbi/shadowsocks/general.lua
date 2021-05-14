@@ -15,6 +15,10 @@ local function has_udp_relay()
 	return luci.sys.call("lsmod | grep -q TPROXY && command -v ip >/dev/null") == 0
 end
 
+local function support_fast_open()
+	return luci.sys.exec("cat /proc/sys/net/ipv4/tcp_fastopen 2>/dev/null"):trim() == "3"
+end
+
 local has_ss = has_bin("sslocal")
 
 if not has_ss then
@@ -92,6 +96,10 @@ s.anonymous = true
 
 o = s:option(Flag, "no_delay", translate("TCP no-delay"))
 o.rmempty = false
+if support_fast_open() then
+  o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
+  o.rmempty = false
+end
 
 o = s:option(DynamicList, "main_server", translate("Main Server"))
 o:value("nil", translate("Disable"))
@@ -121,6 +129,10 @@ s.anonymous = true
 
 o = s:option(Flag, "no_delay", translate("TCP no-delay"))
 o.rmempty = false
+if support_fast_open() then
+  o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
+  o.rmempty = false
+end
 
 o = s:option(DynamicList, "server", translate("Server"))
 o:value("nil", translate("Disable"))
@@ -139,6 +151,10 @@ s.anonymous = true
 
 o = s:option(Flag, "no_delay", translate("TCP no-delay"))
 o.rmempty = false
+if support_fast_open() then
+  o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
+  o.rmempty = false
+end
 
 o = s:option(DynamicList, "server", translate("Server"))
 o:value("nil", translate("Disable"))
@@ -157,6 +173,10 @@ s.anonymous = true
 
 o = s:option(Flag, "no_delay", translate("TCP no-delay"))
 o.rmempty = false
+if support_fast_open() then
+  o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
+  o.rmempty = false
+end
 
 o = s:option(DynamicList, "server", translate("Server"))
 o:value("nil", translate("Disable"))
