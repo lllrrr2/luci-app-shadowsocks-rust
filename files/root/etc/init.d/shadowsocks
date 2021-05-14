@@ -64,7 +64,7 @@ get_arg_out() {
 }
 
 get_arg_tnd() {
-	uci_bool_by_type $1 no_delay && echo "--no-delay"
+	uci_bool_by_type $1 no_delay && echo "--tcp-no-delay"
 }
 
 get_server_ips() {
