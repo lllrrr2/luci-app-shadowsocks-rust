@@ -67,4 +67,20 @@ o.placeholder = "eg: v2ray-plugin"
 o = s:option(Value, "plugin_opts", translate("Plugin Arguments"))
 o.placeholder = "eg: tls;host=www.bing.com;path=/websocket"
 
+o = s:option(ListValue, "tcp_weight", translate("TCP Weight"))
+o.datatype = "ufloat"
+for _, v in ipairs({0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95, 1.0}) do
+	o:value(v, translatef("%u%%", v*100.0))
+end
+o.default = 1.0
+o.rmempty = false
+
+o = s:option(ListValue, "udp_weight", translate("UDP Weight"))
+o.datatype = "ufloat"
+for _, v in ipairs({0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95, 1.0}) do
+	o:value(v, translatef("%u%%", v * 100.0))
+end
+o.default = 1.0
+o.rmempty = false
+
 return m

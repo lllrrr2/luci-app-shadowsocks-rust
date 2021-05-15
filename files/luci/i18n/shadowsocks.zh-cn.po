@@ -190,5 +190,11 @@ msgstr "自定义列表"
 msgid "Be Careful!"
 msgstr "注意"
 
+msgid "TCP Weight"
+msgstr "TCP权重"
+
+msgid "UDP Weight"
+msgstr "UDP权重"
+
 msgid "Dnsmasq Config for Shadowsocks. This may CRASH DNSMASQ!"
 msgstr "自定义 DNSMASQ 的 Shadowsocks 列表, 这可能让DNSMASQ崩溃, 请参考以下的格式"
