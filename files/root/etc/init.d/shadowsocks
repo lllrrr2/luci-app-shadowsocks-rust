@@ -140,13 +140,23 @@ EOF
 
 gen_config_file() {
 	local config_file=/var/etc/$NAME.$2.json
+	local protocol=$2
+	local mode='tcp_and_udp'
+	echo $protocol | grep -q '^redir' && {
+		[ "$protocol" = "redir" ] && mode='tcp_only';
+		[ "$protocol" = "redir-u" ] && mode='udp_only';
+		protocol='redir'
+	}
+
 	cat <<-EOF | sed 's+},__$+}+g' >$config_file
 		{
 		    "servers": [
 					$(for server in $1; do gen_server_config $server; done)__
 		    ],
+		    "mode": "$mode",
+		    "protocol": "$protocol",
 		    "local_address": "0.0.0.0",
-		    "local_port": 65535,$(get_udp_config)
+		    "local_port": $3,$(get_udp_config)
 		    "nofile": 51200
 		}
 EOF
@@ -217,9 +227,8 @@ rules() {
 start_redir() {
 	has_valid_server $1 || return 0
 	cd /var/run/sshome
-	sslocal -d --protocol=redir $2 $(get_arg_tnd transparent_proxy) \
-		-c=$(gen_config_file "$1" "redir$2") \
-		-b=0.0.0.0:$(uci_get_by_type transparent_proxy local_port 1234) \
+	sslocal -d $(get_arg_tnd transparent_proxy) \
+		-c=$(gen_config_file "$1" "redir$2" $(uci_get_by_type transparent_proxy local_port 1234)) \
 		--daemonize-pid=/var/run/ss-redir$2.pid
 	cd - >/dev/null
 }
@@ -240,9 +249,8 @@ ss_redir() {
 start_local() {
 	has_valid_server $1 || return 0
 	cd /var/run/sshome
-	sslocal -d --protocol=$2 -U $(get_arg_tnd ${2}_proxy) \
-		-c=$(gen_config_file "$1" "$2") \
-		-b=0.0.0.0:$(uci_get_by_type ${2}_proxy local_port 1080) \
+	sslocal -d $(get_arg_tnd ${2}_proxy) \
+		-c=$(gen_config_file "$1" "$2" $(uci_get_by_type ${2}_proxy local_port 1080)) \
 		--daemonize-pid=/var/run/ss-local-$2.pid
 	cd - >/dev/null
 }
@@ -250,14 +258,17 @@ start_local() {
 ss_local() {
 	command -v sslocal >/dev/null 2>&1 || return 0
 	start_local "$(uci_get_by_type http_proxy server)" "http"
-	start_local "$(uci_get_by_type socks5_proxy server)" "socks"
+	start_local "$(uci_get_by_type socks_proxy server)" "socks"
 }
 
 start_tunnel() {
 	has_valid_server $1 || return 0
-	cd /var/run/sshome
-	sslocal -d --protocol=tunnel -U $(get_arg_tnd port_forward) \
-		-c=$(gen_config_file "$1" "tunnel") \
+	local config=$(gen_config_file "$1" "tunnel" "!port!")
+	local port=$(uci_get_by_type port_forward local_port 5300)
+	sed "s+!port!+$((65535 - port))+g" -i $config
+	sed "/protocol/d" -i $config
+	sslocal -d --protocol=tunnel $(get_arg_tnd port_forward) \
+		-c=$config \
 		-b=0.0.0.0:$(uci_get_by_type port_forward local_port 5300) \
 		-f=$(uci_get_by_type port_forward destination 8.8.4.4:53) \
 		--daemonize-pid=/var/run/ss-tunnel.pid

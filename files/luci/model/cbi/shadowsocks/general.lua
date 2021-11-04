@@ -48,19 +48,19 @@ s = m:section(TypedSection, "general", translate("Running Status"))
 s.anonymous = true
 
 o = s:option(DummyValue, "_redir_status", translate("Transparent Proxy"))
-o.value = "<span id=\"_redir_status\">%s</span>" %{get_status("protocol=redir")}
+o.value = "<span id=\"_redir_status\">%s</span>" %{get_status("/var/run/ss-redir")}
 o.rawhtml = true
 
 o = s:option(DummyValue, "http_status", translate("HTTP Proxy"))
-o.value = "<span id=\"_http_status\">%s</span>" %{get_status("protocol=http")}
+o.value = "<span id=\"_http_status\">%s</span>" %{get_status("/var/run/ss-local-http")}
 o.rawhtml = true
 
 o = s:option(DummyValue, "socks_status", translate("SOCKS5 Proxy"))
-o.value = "<span id=\"_socks_status\">%s</span>" %{get_status("protocol=socks")}
+o.value = "<span id=\"_socks_status\">%s</span>" %{get_status("/var/run/ss-local-socks")}
 o.rawhtml = true
 
 o = s:option(DummyValue, "_tunnel_status", translate("Port Forward"))
-o.value = "<span id=\"_tunnel_status\">%s</span>" %{get_status("protocol=tunnel")}
+o.value = "<span id=\"_tunnel_status\">%s</span>" %{get_status("/var/run/ss-tunnel")}
 o.rawhtml = true
 
 s = m:section(TypedSection, "general", translate("Global Settings"))
@@ -146,7 +146,7 @@ o.default = 1080
 o.rmempty = false
 
 -- [[ SOCKS5 Proxy ]]--
-s = m:section(TypedSection, "socks5_proxy", translate("SOCKS5 Proxy"))
+s = m:section(TypedSection, "socks_proxy", translate("SOCKS5 Proxy"))
 s.anonymous = true
 
 o = s:option(Flag, "no_delay", translate("TCP no-delay"))

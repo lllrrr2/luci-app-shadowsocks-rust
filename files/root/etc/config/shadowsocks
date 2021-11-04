@@ -11,7 +11,7 @@ config http_proxy
 	list server 'nil'
 	option local_port '8080'
 
-config socks5_proxy
+config socks_proxy
 	list server 'nil'
 	option local_port '1080'
 
