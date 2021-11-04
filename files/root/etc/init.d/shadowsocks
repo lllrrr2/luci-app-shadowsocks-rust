@@ -216,10 +216,12 @@ rules() {
 
 start_redir() {
 	has_valid_server $1 || return 0
+	cd /var/run/sshome
 	sslocal -d --protocol=redir $2 $(get_arg_tnd transparent_proxy) \
 		-c=$(gen_config_file "$1" "redir$2") \
 		-b=0.0.0.0:$(uci_get_by_type transparent_proxy local_port 1234) \
 		--daemonize-pid=/var/run/ss-redir$2.pid
+	cd - >/dev/null
 }
 
 ss_redir() {
@@ -237,10 +239,12 @@ ss_redir() {
 
 start_local() {
 	has_valid_server $1 || return 0
+	cd /var/run/sshome
 	sslocal -d --protocol=$2 -U $(get_arg_tnd ${2}_proxy) \
 		-c=$(gen_config_file "$1" "$2") \
 		-b=0.0.0.0:$(uci_get_by_type ${2}_proxy local_port 1080) \
 		--daemonize-pid=/var/run/ss-local-$2.pid
+	cd - >/dev/null
 }
 
 ss_local() {
@@ -251,11 +255,13 @@ ss_local() {
 
 start_tunnel() {
 	has_valid_server $1 || return 0
+	cd /var/run/sshome
 	sslocal -d --protocol=tunnel -U $(get_arg_tnd port_forward) \
 		-c=$(gen_config_file "$1" "tunnel") \
 		-b=0.0.0.0:$(uci_get_by_type port_forward local_port 5300) \
 		-f=$(uci_get_by_type port_forward destination 8.8.4.4:53) \
 		--daemonize-pid=/var/run/ss-tunnel.pid
+	cd - >/dev/null
 }
 
 ss_tunnel() {
@@ -265,7 +271,7 @@ ss_tunnel() {
 
 start() {
 	pidof sslocal >/dev/null && return 0
-	mkdir -p /var/run /var/etc $DNSMASQDIR
+	mkdir -p /var/run/sshome /var/etc $DNSMASQDIR
 	has_valid_server $(uci_get_by_type transparent_proxy main_server) && ss_pre
 	ss_redir && rules
 	ss_local
@@ -292,7 +298,7 @@ stop() {
 		kill_all $(sort -u /var/run/ss-plugin)
 		rm -f /var/run/ss-plugin
 	fi
-	rm -f $DNSMASQDIR/ss.conf $DNSMASQDIR/ss-servers.conf 2>/dev/null
+	rm -f /var/run/sshome $DNSMASQDIR/ss.conf $DNSMASQDIR/ss-servers.conf 2>/dev/null
 	del_cron
 }
 
