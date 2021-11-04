@@ -101,6 +101,23 @@ get_crypto_config() {
 	fi
 }
 
+get_mode_weight_config() {
+	local tcp_weight=$(uci_get_by_name $1 tcp_weight 1)
+	local udp_weight=$(uci_get_by_name $1 udp_weight 1)
+	[ "V$tcp_weight" = "V0" -a "V$udp_weight" = "V0" ] && return  # failsafe with no config
+	echo
+	if [ "V$tcp_weight" = "V0" ]; then
+		echo "        \"mode\": \"udp_only\","
+		echo "        \"udp_weight\": $udp_weight,"
+	elif [ "V$udp_weight" = "V0" ]; then
+		echo "        \"mode\": \"tcp_only\","
+		echo "        \"tcp_weight\": $tcp_weight,"
+	else
+		echo "        \"tcp_weight\": $tcp_weight,"
+		echo "        \"udp_weight\": $udp_weight,"
+	fi
+}
+
 get_udp_config() {
 	udp_max_associations=$(uci_get_by_type general udp_max_associations 512)
 	echo -e "\n    \"udp_timeout\": $(uci_get_by_type general udp_timeout 300),"
@@ -115,9 +132,7 @@ gen_server_config() {
 		        "address": "$(uci_get_by_name $1 server)",
 		        "port": $(uci_get_by_name $1 server_port),
 		        "method": "$(uci_get_by_name $1 encrypt_method)",
-		        $(get_crypto_config $1)$(get_plugin_config $1)
-		        "tcp_weight": $(uci_get_by_name $1 tcp_weight 1),
-		        "udp_weight": $(uci_get_by_name $1 udp_weight 1),
+		        $(get_crypto_config $1)$(get_plugin_config $1)$(get_mode_weight_config $1)
 		        "timeout": $(uci_get_by_name $1 timeout 60)
 		      },
 EOF
