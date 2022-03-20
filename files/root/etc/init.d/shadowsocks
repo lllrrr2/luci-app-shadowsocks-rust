@@ -336,8 +336,14 @@ del_cron() {
 
 watchdog() {
 	command -v sslocal >/dev/null 2>&1 || return 1
-	local main_server=$(uci_get_by_type transparent_proxy main_server)
-	has_valid_server $main_server || return 1
+	has_valid_server $(uci_get_by_type transparent_proxy main_server) || return 1
+
+	pgrep -f "sslocal" >/dev/null 2>&1 || {
+		echo "[${LOGTIME}] Problem decteted, restarting ${NAME}..."
+		stop >/dev/null 2>&1
+		start >/dev/null 2>&1
+		return 0
+	}
 
 	cat_connect() {
 		target="$1"
