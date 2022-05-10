@@ -16,7 +16,8 @@ local function has_udp_relay()
 end
 
 local function support_fast_open()
-	return luci.sys.exec("cat /proc/sys/net/ipv4/tcp_fastopen 2>/dev/null"):trim() == "3"
+	local bit = luci.sys.exec("cat /proc/sys/net/ipv4/tcp_fastopen 2>/dev/null"):trim()
+	return bit == "1" or bit == "3"
 end
 
 local has_ss = has_bin("sslocal")
