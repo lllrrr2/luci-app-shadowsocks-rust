@@ -79,7 +79,7 @@ popd
 # 选择要编译的包 LuCI -> 3. Applications
 make menuconfig
 # 开始编译
-make package/luci-app-shadowsocks/compile V=99
+make package/luci-app-shadowsocks-rust/compile V=99
 ```
 
  [release_badge]: https://img.shields.io/github/release/honwen/luci-app-shadowsocks-rust.svg

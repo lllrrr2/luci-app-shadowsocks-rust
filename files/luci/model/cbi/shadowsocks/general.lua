@@ -91,6 +91,9 @@ end
 o.default = 512
 o.rmempty = false
 
+o = s:option(Flag, "no_dns_injection", translate("Disable DNS Auto-Injection"))
+o.rmempty = false
+
 -- [[ Transparent Proxy ]]--
 s = m:section(TypedSection, "transparent_proxy", translate("Transparent Proxy"))
 s.anonymous = true

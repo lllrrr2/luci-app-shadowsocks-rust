@@ -171,7 +171,16 @@ gen_config_file() {
 	echo $config_file
 }
 
-ss_pre() {
+ss_cleandns() {
+	uci_bool_by_type general no_dns_injection && return 0
+
+	rm -f $DNSMASQDIR/ss.conf $DNSMASQDIR/ss-servers.conf 2>/dev/null
+}
+
+ss_injectdns() {
+	uci_bool_by_type general no_dns_injection && return 0
+
+	mkdir -p $DNSMASQDIR
 	DNSconf=$DNSMASQDIR/ss-servers.conf
 	tmpDNSconf=$DNSMASQDIR/ss.conf
 	echo "all-servers" >$tmpDNSconf
@@ -291,8 +300,8 @@ ss_tunnel() {
 
 start() {
 	pidof sslocal >/dev/null && return 0
-	mkdir -p /var/run/ssservice /var/etc $DNSMASQDIR
-	has_valid_server $(uci_get_by_type transparent_proxy main_server) && ss_pre
+	mkdir -p /var/run/ssservice /var/etc
+	has_valid_server $(uci_get_by_type transparent_proxy main_server) && ss_injectdns
 	ss_redir && rules
 	ss_local
 	ss_tunnel
@@ -319,7 +328,8 @@ stop() {
 		kill_all $(sort -u /var/run/ss-plugin)
 		rm -f /var/run/ss-plugin
 	fi
-	rm -f /var/run/ssservice $DNSMASQDIR/ss.conf $DNSMASQDIR/ss-servers.conf 2>/dev/null
+	rm -rf /var/run/ssservice
+	ss_cleandns
 	del_cron
 }
 
