@@ -11,7 +11,7 @@ START=90
 STOP=15
 
 NAME=shadowsocks
-EXTRA_COMMANDS="rules watchdog"
+EXTRA_COMMANDS="rules healthcheck"
 CRON_FILE=/etc/crontabs/root
 WATCHDOG_ENDPOINT='accounts.gstatic.com'
 
@@ -334,20 +334,27 @@ stop() {
 }
 
 add_cron() {
-	sed -i '/shadowsocks_watchdog/d' $CRON_FILE
-	echo '0   */3   * * *  rm -f /var/log/shadowsocks_watchdog.log 2>&1' >>$CRON_FILE
-	echo '*    *    * * * /etc/init.d/shadowsocks watchdog >> /var/log/shadowsocks_watchdog.log 2>&1' >>$CRON_FILE
+	[ -f $CRON_FILE ] || return 0
+	uci_bool_by_type transparent_proxy no_healthcheck && return 0
+
+	sed -i '/shadowsocks_healthcheck/d' $CRON_FILE
+	echo '0   */3   * * *  rm -f /var/log/shadowsocks_healthcheck.log 2>&1' >>$CRON_FILE
+	echo '*    *    * * * /etc/init.d/shadowsocks healthcheck >> /var/log/shadowsocks_healthcheck.log 2>&1' >>$CRON_FILE
 	/etc/init.d/cron restart
 }
 
 del_cron() {
-	sed -i '/shadowsocks_watchdog/d' $CRON_FILE
+	[ -f $CRON_FILE ] || return 0
+	uci_bool_by_type transparent_proxy no_healthcheck && return 0
+
+	sed -i '/shadowsocks_healthcheck/d' $CRON_FILE
 	/etc/init.d/cron restart
 }
 
-watchdog() {
+healthcheck() {
 	command -v sslocal >/dev/null 2>&1 || return 1
 	has_valid_server $(uci_get_by_type transparent_proxy main_server) || return 1
+	uci_bool_by_type transparent_proxy no_healthcheck && return 0
 
 	LOGTIME=$(date "+%Y-%m-%d %H:%M:%S")
 	pgrep -f "sslocal" >/dev/null 2>&1 || {

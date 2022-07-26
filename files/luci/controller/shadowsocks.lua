@@ -81,9 +81,9 @@ function action_status()
 end
 
 function action_log()
-	local conffile = "/var/log/shadowsocks_watchdog.log"
-	local watchdog = nixio.fs.readfile(conffile) or ""
-	luci.template.render("shadowsocks/plain", {content=watchdog})
+	local conffile = "/var/log/shadowsocks_healthcheck.log"
+	local healthcheck = nixio.fs.readfile(conffile) or ""
+	luci.template.render("shadowsocks/plain", {content=healthcheck})
 end
 
 function action_gfw()

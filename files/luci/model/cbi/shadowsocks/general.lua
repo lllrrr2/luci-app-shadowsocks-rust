@@ -127,6 +127,9 @@ o.datatype = "port"
 o.default = 1234
 o.rmempty = false
 
+o = s:option(Flag, "no_healthcheck", translate("Disable HealthCheck"))
+o.rmempty = false
+
 -- [[ HTTP Proxy ]]--
 s = m:section(TypedSection, "http_proxy", translate("HTTP Proxy"))
 s.anonymous = true
