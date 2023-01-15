@@ -1,7 +1,7 @@
 #!/bin/sh /etc/rc.common
 #
 # Copyright (C) 2014-2017 Jian Chang <aa65535@live.com>
-#               2018-2022 honwen <https://github.com/honwen>
+#               2018-2023 honwen <https://github.com/honwen>
 #
 # This is free software, licensed under the GNU General Public License v3.
 # See /LICENSE for more information.
@@ -12,6 +12,7 @@ STOP=15
 
 NAME=shadowsocks
 EXTRA_COMMANDS="rules healthcheck"
+EXTRA_HELP="	rules		Start IPTABLES inject\n	healthcheck	Check if service health"
 CRON_FILE=/etc/crontabs/root
 WATCHDOG_ENDPOINT='accounts.gstatic.com'
 
